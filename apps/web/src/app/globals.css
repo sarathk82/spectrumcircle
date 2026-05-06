@@ -1,0 +1,125 @@
+/* Spectrum Circle — Global Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 246 244 255;     /* #F8F7FF */
+    --surface:    0 0% 100%;
+    --primary:    252 56% 56%;     /* #5B4FCF */
+    --secondary:  204 76% 60%;     /* #4BADE8 */
+    --accent:     33 91% 63%;      /* #F7A349 */
+    --text:       237 30% 14%;     /* #1A1A2E */
+    --text-muted: 220 9% 46%;
+    --border:     220 13% 91%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-text font-sans antialiased;
+    min-height: 100vh;
+  }
+
+  /* Respect user preference for reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Focus visible styles — accessible */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-nunito font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Spectrum gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #9B59B6 0%, #4BADE8 35%, #4CAF7D 65%, #FFD23F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Spectrum gradient background */
+  .gradient-bg {
+    background: linear-gradient(135deg, #9B59B6 0%, #5B4FCF 30%, #4BADE8 70%, #4CAF7D 100%);
+  }
+
+  /* Glassmorphism card */
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-sm border border-white/60 shadow-card;
+  }
+
+  /* Skip link for accessibility */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50;
+    @apply bg-primary-500 text-white px-4 py-2 rounded-xl font-medium;
+  }
+
+  /* Role badge */
+  .role-badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-white rounded-2xl border border-border shadow-card p-5 flex flex-col gap-1;
+  }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: white;
+    border-radius: 1rem;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #9B59B6, #4BADE8, #4CAF7D, #FFD23F);
+    z-index: -1;
+  }
+
+  /* Shimmer loading */
+  .shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Pulse dot for live/unread indicators */
+  .pulse-dot {
+    @apply w-2 h-2 rounded-full bg-red-500;
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.15); }
+  }
+}

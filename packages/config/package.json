@@ -1,0 +1,12 @@
+{
+  "name": "@spectrumcircle/config",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./tailwind": "./tailwind/spectrum.js",
+    "./eslint": "./eslint/index.js",
+    "./typescript/base": "./typescript/base.json",
+    "./typescript/nextjs": "./typescript/nextjs.json",
+    "./typescript/react-native": "./typescript/react-native.json"
+  }
+}

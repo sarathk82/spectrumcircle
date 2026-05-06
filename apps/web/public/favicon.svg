@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Spectrum Circle Logo — 6 arcs forming a complete circle -->
+  <path d="M 100 26.5 A 73.5 73.5 0 0 1 160.21 57.85" stroke="#9B59B6" stroke-width="23" stroke-linecap="round"/>
+  <path d="M 163.65 63.25 A 73.5 73.5 0 0 1 166.61 131.06" stroke="#4BADE8" stroke-width="23" stroke-linecap="round"/>
+  <path d="M 163.65 136.75 A 73.5 73.5 0 0 1 106.41 173.22" stroke="#4CAF7D" stroke-width="23" stroke-linecap="round"/>
+  <path d="M 100 173.5 A 73.5 73.5 0 0 1 39.79 142.15" stroke="#FFD23F" stroke-width="23" stroke-linecap="round"/>
+  <path d="M 36.35 136.75 A 73.5 73.5 0 0 1 33.39 68.94" stroke="#FF9A3C" stroke-width="23" stroke-linecap="round"/>
+  <path d="M 36.35 63.25 A 73.5 73.5 0 0 1 93.59 26.78" stroke="#FF5A5A" stroke-width="23" stroke-linecap="round"/>
+</svg>
