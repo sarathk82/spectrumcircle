@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, use } from 'react'
+import { useState, use, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { MessageSquare, ChevronLeft } from 'lucide-react'
@@ -19,6 +19,13 @@ export default function NewThreadPage({
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [tags, setTags] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user)
+    })
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -85,6 +92,30 @@ export default function NewThreadPage({
       setError('Could not create thread. Please try again.')
       setSubmitting(false)
     }
+  }
+
+  if (isLoggedIn === false) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Link href={`/forums/${categorySlug}`} className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text transition-colors">
+          <ChevronLeft size={15} aria-hidden="true" />
+          Back to forum
+        </Link>
+        <div className="bg-white rounded-2xl border border-border shadow-card p-8 text-center">
+          <MessageSquare size={32} className="mx-auto mb-3 text-primary-500" aria-hidden="true" />
+          <h1 className="text-2xl font-bold font-nunito text-text">Join the conversation</h1>
+          <p className="text-sm text-text-muted mt-2 mb-6">Sign in or create a free account to start a thread.</p>
+          <div className="flex justify-center gap-3">
+            <Link href={`/login?redirectTo=/forums/${categorySlug}/new`} className="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors">
+              Sign in
+            </Link>
+            <Link href={`/register?redirectTo=/forums/${categorySlug}/new`} className="px-5 py-2.5 rounded-xl border border-border text-text text-sm font-semibold hover:bg-gray-50 transition-colors">
+              Create account
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

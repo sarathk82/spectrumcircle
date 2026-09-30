@@ -174,6 +174,19 @@ export default async function PostPage({
       {user && !post.is_locked && (
         <ReplyForm postId={post.id} categorySlug={categorySlug} />
       )}
+      {!user && !post.is_locked && (
+        <div className="bg-white rounded-xl border border-border p-5 text-center">
+          <p className="text-sm text-text-muted mb-3">Sign in to reply to this discussion.</p>
+          <div className="flex justify-center gap-3">
+            <Link href={`/login?redirectTo=/forums/${categorySlug}/${postId}`} className="text-sm font-semibold text-primary-500 hover:underline">
+              Sign in
+            </Link>
+            <Link href={`/register?redirectTo=/forums/${categorySlug}/${postId}`} className="text-sm font-semibold text-primary-500 hover:underline">
+              Create account
+            </Link>
+          </div>
+        </div>
+      )}
       {post.is_locked && (
         <p className="text-sm text-center text-text-muted bg-white rounded-xl border border-border p-4">
           This thread is locked.

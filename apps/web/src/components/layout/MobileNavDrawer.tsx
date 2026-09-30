@@ -17,9 +17,12 @@ const NAV_ITEMS = [
   { href: '/profile',    label: 'My Profile', icon: User },
 ]
 
-export default function MobileNavDrawer() {
+export default function MobileNavDrawer({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const visibleNavItems = isAuthenticated
+    ? NAV_ITEMS
+    : NAV_ITEMS.filter(({ href }) => ['/connect', '/jobs', '/business', '/forums'].includes(href))
 
   // Close drawer on route change
   useEffect(() => {
@@ -81,7 +84,7 @@ export default function MobileNavDrawer() {
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Mobile navigation">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {visibleNavItems.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
             return (
               <Link

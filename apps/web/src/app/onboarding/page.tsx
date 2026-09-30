@@ -6,6 +6,7 @@ import { SpectrumCircleIcon } from '@spectrumcircle/ui'
 import { USER_ROLE_LABELS, USER_ROLE_DESCRIPTIONS, USER_ROLE_COLORS } from '@spectrumcircle/shared'
 import type { UserRole } from '@spectrumcircle/shared'
 import { createClient } from '@/lib/supabase/client'
+import Topbar from '@/components/layout/Topbar'
 import { Heart, HandHelping, Briefcase, TrendingUp, MessageCircle, Users } from 'lucide-react'
 
 const ROLE_ICONS: Record<UserRole, React.FC<{ size: number; color?: string }>> = {
@@ -64,8 +65,10 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-2xl animate-slide-up">
+    <div className="min-h-screen bg-background flex flex-col">
+      <Topbar profile={null} />
+      <main className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-2xl animate-slide-up">
         {/* Header */}
         <div className="text-center mb-10">
           <SpectrumCircleIcon size={64} className="mx-auto mb-4" />
@@ -210,7 +213,8 @@ export default function OnboardingPage() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </main>
     </div>
   )
 }

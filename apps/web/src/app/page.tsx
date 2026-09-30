@@ -121,15 +121,17 @@ export default async function LandingPage() {
 
       {/* Navigation */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <SpectrumCircleLogo size={36} showWordmark />
-          <nav className="hidden md:flex items-center gap-7" aria-label="Main navigation">
-            <Link href="/forums"  className="text-sm text-text-muted hover:text-text transition-colors font-medium">Forums</Link>
-            <Link href="/jobs"    className="text-sm text-text-muted hover:text-text transition-colors font-medium">Jobs</Link>
-            <Link href="/business" className="text-sm text-text-muted hover:text-text transition-colors font-medium">Business</Link>
-            <Link href="/connect" className="text-sm text-text-muted hover:text-text transition-colors font-medium">Connect</Link>
+        <div className="w-full px-4 md:px-6 py-3 flex items-center gap-5">
+          <Link href="/" aria-label="Spectrum Circle home" className="flex items-center flex-shrink-0">
+            <SpectrumCircleLogo size={32} showWordmark />
+          </Link>
+          <nav className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto" aria-label="Main navigation">
+            <Link href="/forums" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Forums</Link>
+            <Link href="/jobs" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Jobs</Link>
+            <Link href="/business" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Business</Link>
+            <Link href="/connect" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Connect</Link>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto flex-shrink-0">
             {user ? (
               <Link
                 href="/dashboard"

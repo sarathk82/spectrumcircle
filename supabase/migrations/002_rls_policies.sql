@@ -23,6 +23,10 @@ CREATE POLICY "profiles_select_authenticated"
   ON public.profiles FOR SELECT TO authenticated
   USING (privacy_level IN ('public', 'members_only') OR id = auth.uid());
 
+CREATE POLICY "profiles_select_public_anon"
+  ON public.profiles FOR SELECT TO anon
+  USING (privacy_level = 'public');
+
 CREATE POLICY "profiles_insert_own"
   ON public.profiles FOR INSERT TO authenticated
   WITH CHECK (id = auth.uid());
@@ -77,6 +81,10 @@ CREATE POLICY "jobs_select_open_or_own"
   ON public.job_postings FOR SELECT TO authenticated
   USING (status = 'open' OR employer_id = auth.uid());
 
+CREATE POLICY "jobs_select_open_anon"
+  ON public.job_postings FOR SELECT TO anon
+  USING (status = 'open');
+
 CREATE POLICY "jobs_insert_employer"
   ON public.job_postings FOR INSERT TO authenticated
   WITH CHECK (
@@ -130,6 +138,10 @@ CREATE POLICY "biz_opps_select_open_or_own"
   ON public.business_opportunities FOR SELECT TO authenticated
   USING (status = 'open' OR owner_id = auth.uid());
 
+CREATE POLICY "biz_opps_select_open_anon"
+  ON public.business_opportunities FOR SELECT TO anon
+  USING (status = 'open');
+
 CREATE POLICY "biz_opps_insert_own"
   ON public.business_opportunities FOR INSERT TO authenticated
   WITH CHECK (owner_id = auth.uid());
@@ -162,6 +174,10 @@ CREATE POLICY "forum_posts_select"
   ON public.forum_posts FOR SELECT TO authenticated
   USING (deleted_at IS NULL);
 
+CREATE POLICY "forum_posts_select_anon"
+  ON public.forum_posts FOR SELECT TO anon
+  USING (deleted_at IS NULL);
+
 CREATE POLICY "forum_posts_insert_own"
   ON public.forum_posts FOR INSERT TO authenticated
   WITH CHECK (author_id = auth.uid());
@@ -177,6 +193,10 @@ CREATE POLICY "forum_replies_select"
   ON public.forum_replies FOR SELECT TO authenticated
   USING (deleted_at IS NULL);
 
+CREATE POLICY "forum_replies_select_anon"
+  ON public.forum_replies FOR SELECT TO anon
+  USING (deleted_at IS NULL);
+
 CREATE POLICY "forum_replies_insert_own"
   ON public.forum_replies FOR INSERT TO authenticated
   WITH CHECK (author_id = auth.uid());
@@ -190,6 +210,10 @@ CREATE POLICY "forum_replies_update_own"
 -- ============================================================
 CREATE POLICY "reactions_select"
   ON public.forum_reactions FOR SELECT TO authenticated
+  USING (true);
+
+CREATE POLICY "reactions_select_anon"
+  ON public.forum_reactions FOR SELECT TO anon
   USING (true);
 
 CREATE POLICY "reactions_insert_own"
@@ -227,6 +251,8 @@ CREATE POLICY "reports_select_own"
 -- ============================================================
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT SELECT ON public.forum_categories TO anon;
+GRANT SELECT ON public.profiles, public.job_postings, public.business_opportunities,
+  public.forum_posts, public.forum_replies, public.forum_reactions TO anon;
 GRANT ALL ON ALL TABLES     IN SCHEMA public TO authenticated;
 GRANT ALL ON ALL SEQUENCES  IN SCHEMA public TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;

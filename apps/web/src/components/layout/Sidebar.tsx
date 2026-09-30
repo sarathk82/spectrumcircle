@@ -29,24 +29,28 @@ const BOTTOM_ITEMS = [
   { href: '/profile', label: 'My Profile', icon: User },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ isAuthenticated }: { isAuthenticated: boolean }) {
   const pathname = usePathname()
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
 
+  const visibleNavItems = isAuthenticated
+    ? NAV_ITEMS
+    : NAV_ITEMS.filter(({ href }) => ['/connect', '/jobs', '/business', '/forums'].includes(href))
+
   return (
     <aside className="hidden md:flex flex-col w-60 bg-white border-r border-border min-h-screen sticky top-0">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-border">
-        <Link href="/" aria-label="Spectrum Circle home">
+        <Link href="/" aria-label="Spectrum Circle home" className="flex items-center">
           <SpectrumCircleLogo size={32} showWordmark />
         </Link>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5" aria-label="Sidebar navigation">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {visibleNavItems.map(({ href, label, icon: Icon }) => {
           const active = isActive(href)
           return (
             <Link
@@ -73,7 +77,7 @@ export default function Sidebar() {
 
       {/* Footer links */}
       <div className="px-3 py-4 border-t border-border space-y-0.5">
-        {BOTTOM_ITEMS.map(({ href, label, icon: Icon }) => {
+        {BOTTOM_ITEMS.filter(() => isAuthenticated).map(({ href, label, icon: Icon }) => {
           const active = isActive(href)
           return (
             <Link
