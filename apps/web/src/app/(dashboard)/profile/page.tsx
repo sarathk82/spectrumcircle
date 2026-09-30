@@ -4,15 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { USER_ROLE_LABELS, USER_ROLE_COLORS, getInitials } from '@spectrumcircle/shared'
-import type { UserRole, PrivacyLevel, Profile } from '@spectrumcircle/shared'
+import type { UserRole, Profile } from '@spectrumcircle/shared'
 import { User, MapPin, Globe, Save, LogOut, ChevronDown } from 'lucide-react'
 
 const ROLES: UserRole[] = ['parent', 'volunteer', 'job_seeker', 'employer', 'entrepreneur', 'member']
-const PRIVACY_OPTIONS: Array<{ value: PrivacyLevel; label: string; description: string }> = [
-  { value: 'public', label: 'Public', description: 'Anyone can view your profile' },
-  { value: 'members_only', label: 'Members only', description: 'Only signed-in members can view' },
-  { value: 'private', label: 'Private', description: 'Only you can view your profile' },
-]
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -31,7 +26,6 @@ export default function ProfilePage() {
   const [location, setLocation] = useState('')
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [role, setRole] = useState<UserRole>('member')
-  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>('members_only')
   const [tags, setTags] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
@@ -61,7 +55,6 @@ export default function ProfilePage() {
         setLocation(profile.location ?? '')
         setWebsiteUrl(profile.website_url ?? '')
         setRole((profile.role as UserRole) ?? 'member')
-        setPrivacyLevel((profile.privacy_level as PrivacyLevel) ?? 'members_only')
         setTags(Array.isArray(profile.tags) ? profile.tags.join(', ') : '')
         setAvatarUrl(profile.avatar_url ?? null)
       }
@@ -101,7 +94,6 @@ export default function ProfilePage() {
           location: location.trim() || null,
           website_url: websiteUrl.trim() || null,
           role,
-          privacy_level: privacyLevel,
           tags: parsedTags,
         })
         .eq('id', userId)
@@ -315,36 +307,6 @@ export default function ProfilePage() {
               className="w-full rounded-xl border border-border px-4 py-2.5 text-text text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <p className="text-xs text-text-muted mt-1">Comma-separated, up to 10 tags</p>
-          </div>
-        </section>
-
-        {/* Privacy */}
-        <section className="bg-white rounded-2xl border border-border shadow-card p-6 space-y-4">
-          <h2 className="text-base font-semibold text-text">Privacy</h2>
-          <div className="space-y-2" role="radiogroup" aria-label="Profile visibility">
-            {PRIVACY_OPTIONS.map((opt) => (
-              <label
-                key={opt.value}
-                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
-                  privacyLevel === opt.value
-                    ? 'border-primary-500 bg-primary-50'
-                    : 'border-border hover:border-primary-300'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="privacy_level"
-                  value={opt.value}
-                  checked={privacyLevel === opt.value}
-                  onChange={() => setPrivacyLevel(opt.value)}
-                  className="mt-0.5 text-primary-500 focus:ring-primary-500"
-                />
-                <div>
-                  <p className="text-sm font-medium text-text">{opt.label}</p>
-                  <p className="text-xs text-text-muted">{opt.description}</p>
-                </div>
-              </label>
-            ))}
           </div>
         </section>
 

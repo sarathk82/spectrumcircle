@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { Bell, LogOut } from 'lucide-react'
 import { SpectrumCircleLogo } from '@spectrumcircle/ui'
-import { signOut } from '@/app/actions/auth'
+import { createClient } from '@/lib/supabase/client'
 import { getInitials } from '@spectrumcircle/shared'
 import { USER_ROLE_LABELS, USER_ROLE_COLORS } from '@spectrumcircle/shared'
 import type { UserRole } from '@spectrumcircle/shared'
 import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { getVisibleNavigationItems, isNavigationItemActive } from './navigation'
 
@@ -15,8 +16,8 @@ const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/forums', label: 'Forums' },
   { href: '/jobs', label: 'Jobs' },
-  { href: '/business', label: 'Business' },
-  { href: '/connect', label: 'Connect' },
+  { href: '/tutors', label: 'Tutors' },
+  { href: '/connect', label: 'Community' },
   { href: '/messages', label: 'Messages' },
   { href: '/search', label: 'Search' },
   { href: '/admin', label: 'Admin' },
@@ -35,11 +36,18 @@ interface TopbarProps {
 
 export default function Topbar({ profile, unreadCount = 0 }: TopbarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const role = profile?.role as UserRole | undefined
   const roleColor = role ? USER_ROLE_COLORS[role] : '#5B4FCF'
   const roleLabel = role ? USER_ROLE_LABELS[role] : 'Member'
   const visibleNavItems = getVisibleNavigationItems(NAV_ITEMS, !!profile)
     .filter(({ href }) => href !== '/admin' || profile?.role === 'admin')
+
+  async function handleSignOut() {
+    await createClient().auth.signOut()
+    router.replace('/login')
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-border px-4 md:px-6 py-3 flex items-center gap-5">
@@ -120,17 +128,26 @@ export default function Topbar({ profile, unreadCount = 0 }: TopbarProps) {
             </Link>
 
             {/* Sign out */}
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="hidden md:flex items-center gap-1.5 text-xs text-text-muted hover:text-destructive px-2 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+            <button
+                type="button"
+                onClick={handleSignOut}
+                className="flex items-center gap-1.5 text-xs text-text-muted hover:text-destructive px-2 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
                 aria-label="Sign out"
               >
                 <LogOut size={14} aria-hidden="true" />
                 Sign out
-              </button>
-            </form>
+            </button>
           </div>
+        )}
+        {!profile && (
+          <>
+            <Link href="/login" className="text-sm font-medium text-text-muted hover:text-text transition-colors whitespace-nowrap">
+              Sign in
+            </Link>
+            <Link href="/register" className="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors whitespace-nowrap">
+              Join free
+            </Link>
+          </>
         )}
       </div>
     </header>

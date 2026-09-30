@@ -1,6 +1,18 @@
 -- Admin role, controlled user management, and public financial transparency.
 ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'admin';
 
+CREATE OR REPLACE FUNCTION public.public_member_count()
+RETURNS BIGINT
+LANGUAGE SQL
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT COUNT(*) FROM public.profiles;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.public_member_count() TO anon, authenticated;
+
 CREATE TABLE IF NOT EXISTS public.financial_entries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   kind TEXT NOT NULL CHECK (kind IN ('income', 'expense')),

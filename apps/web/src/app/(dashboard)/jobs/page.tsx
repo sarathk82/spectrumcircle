@@ -16,7 +16,7 @@ export default async function JobsPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .from('job_postings')
-    .select('id, title, company_name, location, is_remote, job_type, autism_accommodations, required_skills, tags, created_at, employer_id')
+    .select('id, title, company_name, location, is_remote, job_type, autism_accommodations, required_skills, tags, created_at, employer_id, profiles(display_name, role)')
     .eq('status', 'open')
     .order('created_at', { ascending: false })
     .limit(30)
@@ -24,7 +24,7 @@ export default async function JobsPage({
   if (params.type) query = query.eq('job_type', params.type)
   if (params.remote === '1') query = query.eq('is_remote', true)
 
-  const { data: jobs } = await query as { data: Pick<JobPosting, 'id' | 'title' | 'company_name' | 'location' | 'is_remote' | 'job_type' | 'autism_accommodations' | 'required_skills' | 'tags' | 'created_at' | 'employer_id'>[] | null }
+  const { data: jobs } = await query as { data: Array<Pick<JobPosting, 'id' | 'title' | 'company_name' | 'location' | 'is_remote' | 'job_type' | 'autism_accommodations' | 'required_skills' | 'tags' | 'created_at' | 'employer_id'> & { profiles: { display_name: string; role: string } | null }> | null }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await (supabase as any)
@@ -33,7 +33,7 @@ export default async function JobsPage({
     .eq('id', user?.id ?? '')
     .single() as { data: Pick<Profile, 'role'> | null }
 
-  const canPost = profile?.role === 'employer' || profile?.role === 'entrepreneur'
+  const canPost = !!user
 
   const TYPE_FILTERS: Array<{ value: string; label: string }> = [
     { value: '', label: 'All Types' },
@@ -122,6 +122,7 @@ export default async function JobsPage({
                         {formatRelativeTime(job.created_at)}
                       </span>
                     </div>
+                    {job.profiles && <p className="text-xs text-text-muted mt-2">Posted by {job.profiles.display_name} · {job.profiles.role}</p>}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">

@@ -1,11 +1,20 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
-import type { PrivacyLevel, UserRole } from '@spectrumcircle/shared'
+import type { UserRole } from '@spectrumcircle/shared'
 
 const ADMIN_ROLES: UserRole[] = ['admin', 'parent', 'volunteer', 'job_seeker', 'employer', 'entrepreneur', 'member']
-const PRIVACY_LEVELS: PrivacyLevel[] = ['public', 'members_only', 'private']
+
+function createServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !serviceRoleKey) throw new Error('Admin user creation is not configured')
+  return createSupabaseClient(url, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+}
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -28,15 +37,14 @@ export async function updateUserProfile(formData: FormData) {
     const { supabase } = await requireAdmin()
     const userId = String(formData.get('user_id') ?? '')
     const role = String(formData.get('role')) as UserRole
-    const privacyLevel = String(formData.get('privacy_level')) as PrivacyLevel
-    if (!userId || !ADMIN_ROLES.includes(role) || !PRIVACY_LEVELS.includes(privacyLevel)) {
+    if (!userId || !ADMIN_ROLES.includes(role)) {
       return
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from('profiles')
-      .update({ role, privacy_level: privacyLevel })
+      .update({ role, privacy_level: 'members_only' })
       .eq('id', userId)
     if (error) return
 
@@ -79,6 +87,41 @@ export async function addFinancialEntry(formData: FormData) {
     revalidatePath('/admin')
     revalidatePath('/transparency')
     return
+  } catch {
+    return
+  }
+}
+
+export async function createUser(formData: FormData) {
+  try {
+    const { user: adminUser } = await requireAdmin()
+    const email = String(formData.get('email') ?? '').trim().toLowerCase()
+    const password = String(formData.get('password') ?? '')
+    const displayName = String(formData.get('display_name') ?? '').trim()
+    const role = String(formData.get('role')) as UserRole
+
+    if (!email || password.length < 8 || displayName.length < 2 || !ADMIN_ROLES.includes(role)) {
+      return
+    }
+
+    const adminClient = createServiceRoleClient()
+    const { data, error } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { display_name: displayName },
+    })
+    if (error || !data.user) return
+
+    // The signup trigger creates the profile; this update applies admin choices.
+    await (adminClient as any).from('profiles').update({
+      display_name: displayName,
+      role,
+      privacy_level: 'members_only',
+    }).eq('id', data.user.id)
+
+    void adminUser
+    revalidatePath('/admin')
   } catch {
     return
   }

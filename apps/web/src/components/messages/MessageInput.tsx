@@ -6,11 +6,14 @@ import { sendMessage } from '@/app/actions/messages'
 
 interface MessageInputProps {
   recipientId: string
+  isRecipientOnline: boolean
 }
 
-export default function MessageInput({ recipientId }: MessageInputProps) {
+export default function MessageInput({ recipientId, isRecipientOnline }: MessageInputProps) {
   const [content, setContent] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [deliveryStatus, setDeliveryStatus] = useState<string | null>(null)
+  const [sendEmail, setSendEmail] = useState(false)
   const [isPending, startTransition] = useTransition()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -18,12 +21,16 @@ export default function MessageInput({ recipientId }: MessageInputProps) {
     e.preventDefault()
     if (!content.trim()) return
     setError(null)
+    setDeliveryStatus(null)
     startTransition(async () => {
-      const result = await sendMessage(recipientId, content)
+      const result = await sendMessage(recipientId, content, sendEmail)
       if (result.error) {
         setError(result.error)
       } else {
         setContent('')
+        setDeliveryStatus(result.emailSent
+          ? 'Message sent. Email notification accepted for delivery.'
+          : 'Message sent. An in-app notification was created.')
         textareaRef.current?.focus()
       }
     })
@@ -40,6 +47,9 @@ export default function MessageInput({ recipientId }: MessageInputProps) {
     <form onSubmit={handleSubmit} className="border-t border-border bg-white p-4">
       {error && (
         <p className="text-xs text-red-500 mb-2">{error}</p>
+      )}
+      {deliveryStatus && (
+        <p role="status" className="text-xs text-green-600 mb-2">{deliveryStatus}</p>
       )}
       <div className="flex items-end gap-3">
         <textarea
@@ -64,6 +74,17 @@ export default function MessageInput({ recipientId }: MessageInputProps) {
           {isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} aria-hidden="true" />}
         </button>
       </div>
+      {!isRecipientOnline && (
+        <label className="flex items-center gap-2 mt-3 text-xs text-text-muted">
+          <input
+            type="checkbox"
+            checked={sendEmail}
+            onChange={(event) => setSendEmail(event.target.checked)}
+            disabled={isPending}
+          />
+          Email them if they are away
+        </label>
+      )}
     </form>
   )
 }

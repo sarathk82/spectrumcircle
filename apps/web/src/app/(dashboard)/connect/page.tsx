@@ -22,7 +22,9 @@ export default async function ConnectPage({
     .order('created_at', { ascending: false })
     .limit(24)
 
-  if (params.role) {
+  if (params.role === 'employer_investor') {
+    query = query.in('role', ['employer', 'entrepreneur'])
+  } else if (params.role) {
     query = query.eq('role', params.role)
   }
 
@@ -30,9 +32,10 @@ export default async function ConnectPage({
 
   const ROLE_FILTERS: Array<{ value: string; label: string }> = [
     { value: '', label: 'Everyone' },
-    ...(['parent', 'volunteer', 'job_seeker', 'employer', 'entrepreneur'] as UserRole[]).map(
-      (r) => ({ value: r, label: USER_ROLE_LABELS[r] })
-    ),
+    { value: 'parent', label: USER_ROLE_LABELS.parent },
+    { value: 'volunteer', label: USER_ROLE_LABELS.volunteer },
+    { value: 'job_seeker', label: USER_ROLE_LABELS.job_seeker },
+    { value: 'employer_investor', label: 'Employers & Investors' },
   ]
 
   return (

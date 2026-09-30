@@ -1,6 +1,8 @@
 import Link from 'next/link'
-import { SpectrumCircleLogo, SpectrumCircleIcon } from '@spectrumcircle/ui'
+import { SpectrumCircleIcon } from '@spectrumcircle/ui'
 import { createClient } from '@/lib/supabase/server'
+import Topbar from '@/components/layout/Topbar'
+import SiteFooter from '@/components/layout/SiteFooter'
 import {
   Heart,
   HandHelping,
@@ -49,13 +51,13 @@ const FEATURES = [
   },
   {
     icon: TrendingUp,
-    title: 'Business Opportunities',
+    title: 'Classes & Activities',
     description:
-      'Entrepreneurs connect with autistic talent and collaborators. Find partnerships, projects, and investment opportunities.',
+      'Find supportive classes, activities, and learning opportunities for autistic children and families.',
     color: '#4CAF7D',
     bg: '#4CAF7D18',
-    href: '/business',
-    label: 'Explore opportunities',
+    href: '/tutors',
+    label: 'Find tutors',
   },
   {
     icon: MessageCircle,
@@ -74,7 +76,7 @@ const FEATURES = [
       'Connect with members worldwide. Every role, every background, every part of the spectrum — welcome here.',
     color: '#4BADE8',
     bg: '#4BADE818',
-    href: '/connect',
+    href: '/login?redirectTo=/connect',
     label: 'Meet the community',
   },
 ]
@@ -83,8 +85,7 @@ const ROLES = [
   { label: 'Autism Parents',  color: '#FF5A5A', icon: Heart,        role: 'parent' },
   { label: 'Volunteers',      color: '#FF9A3C', icon: HandHelping,  role: 'volunteer' },
   { label: 'Job Seekers',     color: '#FFD23F', icon: Briefcase,    role: 'job_seeker' },
-  { label: 'Employers',       color: '#4CAF7D', icon: Users,        role: 'employer' },
-  { label: 'Entrepreneurs',   color: '#4BADE8', icon: TrendingUp,   role: 'entrepreneur' },
+  { label: 'Employers & Investors', color: '#4CAF7D', icon: Users, role: 'employer_investor' },
   { label: 'Community',       color: '#9B59B6', icon: MessageSquare, role: 'member' },
 ]
 
@@ -103,10 +104,14 @@ const STEPS = [
 export default async function LandingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profile } = user
+    ? await (supabase as any).from('profiles').select('id, display_name, avatar_url, role, onboarded_at').eq('id', user.id).single() as { data: { id: string; display_name: string; avatar_url: string | null; role: string; onboarded_at: string | null } | null }
+    : { data: null }
 
   // Fetch live counts for social proof
-  const [{ count: memberCount }, { count: jobCount }, { count: postCount }] = await Promise.all([
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+  const [{ data: memberCount }, { count: jobCount }, { count: postCount }] = await Promise.all([
+    (supabase as any).rpc('public_member_count') as Promise<{ data: number | null }>,
     supabase.from('job_postings').select('*', { count: 'exact', head: true }).eq('status', 'open'),
     supabase.from('forum_posts').select('*', { count: 'exact', head: true }).is('deleted_at', null),
   ])
@@ -119,37 +124,7 @@ export default async function LandingPage() {
       {/* Skip link */}
       <a href="#main-content" className="skip-link">Skip to content</a>
 
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border">
-        <div className="w-full px-4 md:px-6 py-3 flex items-center gap-5">
-          <Link href="/" aria-label="Spectrum Circle home" className="flex items-center flex-shrink-0">
-            <SpectrumCircleLogo size={32} showWordmark />
-          </Link>
-          <nav className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto" aria-label="Main navigation">
-            <Link href="/forums" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Forums</Link>
-            <Link href="/jobs" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Jobs</Link>
-            <Link href="/business" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Business</Link>
-            <Link href="/connect" className="px-3 py-2 rounded-lg text-sm text-text-muted hover:bg-gray-50 hover:text-text transition-colors font-medium whitespace-nowrap">Connect</Link>
-          </nav>
-          <div className="flex items-center gap-3 ml-auto flex-shrink-0">
-            {user ? (
-              <Link
-                href="/dashboard"
-                className="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors shadow-sm"
-              >
-                Go to Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm font-medium text-text hover:text-primary-500 transition-colors">Sign in</Link>
-                <Link href="/register" className="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 transition-colors shadow-sm">
-                  Join free
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Topbar profile={profile} />
 
       <main id="main-content">
         {/* ── Hero ──────────────────────────────────────────────── */}
@@ -374,35 +349,7 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-text py-16 px-6 text-white/60">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-10">
-            <div>
-              <SpectrumCircleLogo size={32} showWordmark variant="white" />
-              <p className="mt-3 text-sm text-white/50 max-w-xs">
-                An inclusive platform built with and for the autism community.
-              </p>
-            </div>
-            <nav className="flex flex-wrap gap-x-8 gap-y-3 text-sm" aria-label="Footer navigation">
-              <Link href="/forums"   className="hover:text-white transition-colors">Forums</Link>
-              <Link href="/jobs"     className="hover:text-white transition-colors">Jobs</Link>
-              <Link href="/business" className="hover:text-white transition-colors">Business</Link>
-              <Link href="/connect"  className="hover:text-white transition-colors">Connect</Link>
-              <Link href="/transparency" className="hover:text-white transition-colors">Transparency</Link>
-              <Link href="/login"    className="hover:text-white transition-colors">Sign in</Link>
-              <Link href="/register" className="hover:text-white transition-colors">Join free</Link>
-            </nav>
-          </div>
-          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-            <span>© {new Date().getFullYear()} Spectrum Circle. Built with care for the autism community.</span>
-            <div className="flex gap-6">
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-              <Link href="/terms"   className="hover:text-white transition-colors">Terms</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

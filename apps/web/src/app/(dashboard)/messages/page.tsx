@@ -5,8 +5,11 @@ import { getInitials, USER_ROLE_COLORS, formatRelativeTime } from '@spectrumcirc
 import type { UserRole, Message, Profile } from '@spectrumcircle/shared'
 
 type MsgRow = Pick<Message, 'id' | 'content' | 'created_at' | 'sender_id' | 'recipient_id'>
-type ProfileRow = Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role'>
+type MsgRowWithRead = MsgRow & { read_at: string | null }
+type ProfileRow = Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role'> & { last_seen_at: string | null }
 import { MessageSquare } from 'lucide-react'
+
+const ONLINE_WINDOW_MS = 5 * 60 * 1000
 
 export default async function MessagesPage() {
   const supabase = await createClient()
@@ -19,12 +22,12 @@ export default async function MessagesPage() {
   // Get all messages involving current user, pick latest per conversation
   const { data: messages } = await sb
     .from('messages')
-    .select('id, content, created_at, sender_id, recipient_id')
+    .select('id, content, created_at, sender_id, recipient_id, read_at')
     .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
-    .order('created_at', { ascending: false }) as { data: MsgRow[] | null }
+    .order('created_at', { ascending: false }) as { data: MsgRowWithRead[] | null }
 
   // Build unique conversation list (other person's ID)
-  const conversationMap = new Map<string, MsgRow>()
+  const conversationMap = new Map<string, MsgRowWithRead>()
   for (const msg of messages ?? []) {
     if (!msg) continue
     const otherId = msg.sender_id === user.id ? msg.recipient_id : msg.sender_id
@@ -37,7 +40,7 @@ export default async function MessagesPage() {
 
   // Fetch profiles of conversation partners
   const { data: profiles } = otherIds.length > 0
-    ? await sb.from('profiles').select('id, display_name, avatar_url, role').in('id', otherIds) as { data: ProfileRow[] | null }
+    ? await sb.from('profiles').select('id, display_name, avatar_url, role, last_seen_at').in('id', otherIds) as { data: ProfileRow[] | null }
     : { data: [] as ProfileRow[] }
 
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]))
@@ -65,10 +68,12 @@ export default async function MessagesPage() {
               const role = profile.role as UserRole
               const roleColor = USER_ROLE_COLORS[role]
               const isFromMe = lastMessage.sender_id === user.id
+              const isOnline = !!profile.last_seen_at && Date.now() - new Date(profile.last_seen_at).getTime() < ONLINE_WINDOW_MS
+              const isUnread = !isFromMe && !lastMessage.read_at
               return (
                 <li key={otherId}>
                   <Link
-                    href={`/messages/${otherId}`}
+                    href={`/messages/${otherId}?name=${encodeURIComponent(profile.display_name)}`}
                     className="flex items-center gap-4 p-5 hover:bg-gray-50 transition-colors"
                   >
                     <div
@@ -83,13 +88,17 @@ export default async function MessagesPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-text text-sm">{profile.display_name}</p>
-                      <p className="text-xs text-text-muted truncate mt-0.5">
+                      <p className="font-semibold text-text text-sm flex items-center gap-2">
+                        {profile.display_name}
+                        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`} aria-label={isOnline ? 'Online' : 'Offline'} />
+                      </p>
+                      <p className={`text-xs truncate mt-0.5 ${isUnread ? 'font-semibold text-text' : 'text-text-muted'}`}>
                         {isFromMe ? 'You: ' : ''}{lastMessage.content}
                       </p>
                     </div>
-                    <span className="text-xs text-text-muted flex-shrink-0">
+                    <span className="text-xs text-text-muted flex-shrink-0 text-right">
                       {formatRelativeTime(lastMessage.created_at)}
+                      {isFromMe && lastMessage.read_at && <span className="block text-primary-500">Seen</span>}
                     </span>
                   </Link>
                 </li>

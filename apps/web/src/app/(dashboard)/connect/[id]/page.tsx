@@ -182,7 +182,7 @@ export default async function MemberProfilePage({
                   />
                   {connectionStatus === 'accepted' && (
                     <Link
-                      href={`/messages/${id}`}
+                      href={`/messages/${id}?name=${encodeURIComponent(profile.display_name)}`}
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-text hover:bg-gray-200 transition-colors"
                     >
                       <MessageCircle size={15} aria-hidden="true" />

@@ -3,7 +3,7 @@ export interface NavigationItem {
   label: string
 }
 
-export const PUBLIC_NAVIGATION_HREFS = ['/forums', '/jobs', '/business', '/connect'] as const
+export const PUBLIC_NAVIGATION_HREFS = ['/forums', '/jobs', '/tutors'] as const
 
 export function isPublicNavigationHref(href: string) {
   return PUBLIC_NAVIGATION_HREFS.includes(href as (typeof PUBLIC_NAVIGATION_HREFS)[number])

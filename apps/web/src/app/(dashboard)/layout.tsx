@@ -10,6 +10,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any
+  if (user) {
+    await sb.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('id', user.id)
+  }
   const [{ data: profile }, { count: unreadCount }] = user
     ? await Promise.all([
         sb.from('profiles').select('id, display_name, avatar_url, role, onboarded_at').eq('id', user.id).single() as Promise<{ data: Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role' | 'onboarded_at'> | null }>,
@@ -23,9 +26,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Topbar profile={profile} unreadCount={unreadCount ?? 0} />
-      <main id="main-content" className="p-6 overflow-auto">
+      <main id="main-content" className="flex-1 p-6 overflow-auto">
         {children}
       </main>
       <SiteFooter />

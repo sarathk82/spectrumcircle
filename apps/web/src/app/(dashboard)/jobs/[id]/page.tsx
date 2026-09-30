@@ -282,6 +282,11 @@ export default async function JobDetailPage({
                     </p>
                   )}
                 </div>
+                {isOwner && (
+                  <Link href={`/jobs/${id}/edit`} className="ml-auto text-xs font-semibold text-primary-600 hover:underline flex-shrink-0">
+                    Edit
+                  </Link>
+                )}
               </div>
             </div>
           )}

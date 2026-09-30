@@ -1,17 +1,23 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getInitials, USER_ROLE_COLORS, USER_ROLE_LABELS, formatRelativeTime } from '@spectrumcircle/shared'
 import type { UserRole, Profile, Message } from '@spectrumcircle/shared'
 import { ChevronLeft } from 'lucide-react'
 import MessageInput from '@/components/messages/MessageInput'
 
+const ONLINE_WINDOW_MS = 5 * 60 * 1000
+
 export default async function ConversationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ userId: string }>
+  searchParams: Promise<{ name?: string }>
 }) {
   const { userId } = await params
+  const { name: fallbackName } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -20,21 +26,64 @@ export default async function ConversationPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = supabase as any
 
-  const { data: otherProfile } = await sb
+  const { data: visibleProfile } = await sb
     .from('profiles')
-    .select('id, display_name, avatar_url, role, bio')
+    .select('id, display_name, avatar_url, role, bio, last_seen_at')
     .eq('id', userId)
-    .single() as { data: Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role' | 'bio'> | null }
+    .single() as { data: Pick<Profile, 'id' | 'display_name' | 'avatar_url' | 'role' | 'bio'> & { last_seen_at: string | null } | null }
+
+  let otherProfile = visibleProfile
+  if (!otherProfile) {
+    const { data: acceptedConnection } = await sb
+      .from('connections')
+      .select('id')
+      .eq('status', 'accepted')
+      .or(`and(requester_id.eq.${user.id},recipient_id.eq.${userId}),and(requester_id.eq.${userId},recipient_id.eq.${user.id})`)
+      .maybeSingle()
+
+    if (acceptedConnection) {
+      const admin = createAdminClient()
+      if (admin) {
+        const { data: fallbackProfile } = await admin
+          .from('profiles')
+          .select('id, display_name, avatar_url, role, bio, last_seen_at')
+          .eq('id', userId)
+          .single()
+        otherProfile = fallbackProfile as typeof visibleProfile
+      }
+
+      if (!otherProfile) {
+        otherProfile = {
+          id: userId,
+          display_name: fallbackName || 'Connected member',
+          avatar_url: null,
+          role: 'member',
+          bio: null,
+          last_seen_at: null,
+        }
+      }
+    }
+  }
 
   if (!otherProfile) notFound()
 
+  const isRecipientOnline = !!otherProfile.last_seen_at &&
+    Date.now() - new Date(otherProfile.last_seen_at).getTime() < ONLINE_WINDOW_MS
+
+  await sb
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('sender_id', userId)
+    .eq('recipient_id', user.id)
+    .is('read_at', null)
+
   const { data: messages } = await sb
     .from('messages')
-    .select('id, content, created_at, sender_id, recipient_id')
+    .select('id, content, created_at, sender_id, recipient_id, read_at')
     .or(
       `and(sender_id.eq.${user.id},recipient_id.eq.${userId}),and(sender_id.eq.${userId},recipient_id.eq.${user.id})`
     )
-    .order('created_at', { ascending: true }) as { data: Pick<Message, 'id' | 'content' | 'created_at' | 'sender_id' | 'recipient_id'>[] | null }
+    .order('created_at', { ascending: true }) as { data: Array<Pick<Message, 'id' | 'content' | 'created_at' | 'sender_id' | 'recipient_id'> & { read_at: string | null }> | null }
 
   const role = otherProfile.role as UserRole
   const roleColor = USER_ROLE_COLORS[role]
@@ -65,7 +114,7 @@ export default async function ConversationPage({
           </div>
           <div>
             <p className="font-semibold text-sm text-text">{otherProfile.display_name}</p>
-            <p className="text-xs" style={{ color: roleColor }}>{roleLabel}</p>
+            <p className="text-xs" style={{ color: roleColor }}>{roleLabel} · {isRecipientOnline ? 'Online' : 'Offline'}</p>
           </div>
         </Link>
       </div>
@@ -89,7 +138,7 @@ export default async function ConversationPage({
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   <p className={`text-[10px] mt-1 ${isMe ? 'text-white/60' : 'text-text-muted'}`}>
-                    {formatRelativeTime(msg.created_at)}
+                    {formatRelativeTime(msg.created_at)}{isMe && msg.read_at ? ' · Seen' : ''}
                   </p>
                 </div>
               </div>
@@ -107,7 +156,7 @@ export default async function ConversationPage({
 
       {/* Input */}
       <div className="bg-white rounded-b-2xl border border-border border-t-0">
-        <MessageInput recipientId={userId} />
+        <MessageInput recipientId={userId} isRecipientOnline={isRecipientOnline} />
       </div>
     </div>
   )
