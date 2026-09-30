@@ -389,6 +389,7 @@ export default async function LandingPage() {
               <Link href="/jobs"     className="hover:text-white transition-colors">Jobs</Link>
               <Link href="/business" className="hover:text-white transition-colors">Business</Link>
               <Link href="/connect"  className="hover:text-white transition-colors">Connect</Link>
+              <Link href="/transparency" className="hover:text-white transition-colors">Transparency</Link>
               <Link href="/login"    className="hover:text-white transition-colors">Sign in</Link>
               <Link href="/register" className="hover:text-white transition-colors">Join free</Link>
             </nav>

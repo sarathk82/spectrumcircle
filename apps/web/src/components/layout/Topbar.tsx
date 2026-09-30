@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/connect', label: 'Connect' },
   { href: '/messages', label: 'Messages' },
   { href: '/search', label: 'Search' },
+  { href: '/admin', label: 'Admin' },
 ]
 
 interface TopbarProps {
@@ -38,6 +39,7 @@ export default function Topbar({ profile, unreadCount = 0 }: TopbarProps) {
   const roleColor = role ? USER_ROLE_COLORS[role] : '#5B4FCF'
   const roleLabel = role ? USER_ROLE_LABELS[role] : 'Member'
   const visibleNavItems = getVisibleNavigationItems(NAV_ITEMS, !!profile)
+    .filter(({ href }) => href !== '/admin' || profile?.role === 'admin')
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-border px-4 md:px-6 py-3 flex items-center gap-5">

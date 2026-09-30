@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Topbar from '@/components/layout/Topbar'
+import SiteFooter from '@/components/layout/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Sign In',
@@ -21,20 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="px-6 py-4 text-center text-sm text-text-muted">
-        <p>
-          By joining, you agree to our{' '}
-          <Link href="/terms" className="text-primary-500 hover:underline">
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link href="/privacy" className="text-primary-500 hover:underline">
-            Privacy Policy
-          </Link>
-          .
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

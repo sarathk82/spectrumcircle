@@ -7,9 +7,11 @@ import { USER_ROLE_LABELS, USER_ROLE_DESCRIPTIONS, USER_ROLE_COLORS } from '@spe
 import type { UserRole } from '@spectrumcircle/shared'
 import { createClient } from '@/lib/supabase/client'
 import Topbar from '@/components/layout/Topbar'
+import SiteFooter from '@/components/layout/SiteFooter'
 import { Heart, HandHelping, Briefcase, TrendingUp, MessageCircle, Users } from 'lucide-react'
 
 const ROLE_ICONS: Record<UserRole, React.FC<{ size: number; color?: string }>> = {
+  admin:        ({ size, color }) => <Users       size={size} color={color} />,
   parent:       ({ size, color }) => <Heart       size={size} color={color} />,
   volunteer:    ({ size, color }) => <HandHelping size={size} color={color} />,
   job_seeker:   ({ size, color }) => <Briefcase   size={size} color={color} />,
@@ -215,6 +217,7 @@ export default function OnboardingPage() {
         )}
         </div>
       </main>
+      <SiteFooter />
     </div>
   )
 }

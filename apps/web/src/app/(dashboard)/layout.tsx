@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Topbar from '@/components/layout/Topbar'
+import SiteFooter from '@/components/layout/SiteFooter'
 import type { Profile } from '@spectrumcircle/shared'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <main id="main-content" className="p-6 overflow-auto">
         {children}
       </main>
+      <SiteFooter />
     </div>
   )
 }

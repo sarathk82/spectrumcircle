@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ENUMS
 -- ============================================================
 CREATE TYPE user_role AS ENUM (
-  'parent', 'volunteer', 'job_seeker', 'employer', 'entrepreneur', 'member'
+  'admin', 'parent', 'volunteer', 'job_seeker', 'employer', 'entrepreneur', 'member'
 );
 CREATE TYPE privacy_level AS ENUM ('public', 'members_only', 'private');
 CREATE TYPE connection_status AS ENUM ('pending', 'accepted', 'declined', 'blocked');

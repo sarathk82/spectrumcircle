@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
 
-const PROTECTED_PATHS = ['/dashboard', '/jobs/new', '/business/new', '/onboarding', '/profile', '/messages', '/notifications', '/search']
+const PROTECTED_PATHS = ['/dashboard', '/jobs/new', '/business/new', '/onboarding', '/profile', '/messages', '/notifications', '/search', '/admin']
 const AUTH_PATHS = ['/login', '/register', '/forgot-password']
 
 export async function middleware(request: NextRequest) {

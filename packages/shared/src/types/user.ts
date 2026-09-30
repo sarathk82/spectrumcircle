@@ -1,4 +1,5 @@
 export type UserRole =
+  | 'admin'
   | 'parent'
   | 'volunteer'
   | 'job_seeker'
@@ -41,6 +42,7 @@ export type ProfileInsert = Omit<Profile, 'created_at' | 'updated_at' | 'verifie
 export type ProfileUpdate = Partial<Omit<Profile, 'id' | 'created_at'>>
 
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
+  admin: 'Administrator',
   parent: 'Autism Parent',
   volunteer: 'Volunteer',
   job_seeker: 'Job Seeker',
@@ -50,6 +52,7 @@ export const USER_ROLE_LABELS: Record<UserRole, string> = {
 }
 
 export const USER_ROLE_DESCRIPTIONS: Record<UserRole, string> = {
+  admin: 'Platform administrator',
   parent: 'I am a parent or caregiver of an autistic individual',
   volunteer: 'I want to volunteer and support the autism community',
   job_seeker: 'I am looking for employment opportunities',
@@ -59,6 +62,7 @@ export const USER_ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 }
 
 export const USER_ROLE_COLORS: Record<UserRole, string> = {
+  admin: '#5B4FCF',
   parent: '#FF5A5A',
   volunteer: '#FF9A3C',
   job_seeker: '#FFD23F',
