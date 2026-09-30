@@ -1,7 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { updateTutor } from '@/app/actions/tutors'
+import { deleteTutor, updateTutor } from '@/app/actions/tutors'
+import ConfirmDeleteButton from '@/components/ConfirmDeleteButton'
 
 const CATEGORIES = ['Speech & language', 'Occupational therapy', 'Academic support', 'Social skills', 'Recreation & movement', 'Family support', 'Volunteer support', 'Other']
 const CURRENCIES = ['INR', 'USD', 'GBP', 'EUR', 'AUD', 'CAD', 'SGD']
@@ -38,6 +39,7 @@ export default async function EditTutorPage({ params }: { params: Promise<{ id: 
         <label className="flex items-center gap-2 text-sm text-text"><input name="is_remote" type="checkbox" defaultChecked={tutor.is_remote} />Available remotely</label>
         <button type="submit" className="px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600">Save changes</button>
       </form>
+      <div className="flex justify-end"><ConfirmDeleteButton action={deleteTutor} id={tutor.id} label="Delete tutor reference" /></div>
     </div>
   )
 }

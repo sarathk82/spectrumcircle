@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import type { UserRole } from '@spectrumcircle/shared'
@@ -122,7 +123,8 @@ export async function createUser(formData: FormData) {
 
     void adminUser
     revalidatePath('/admin')
+    redirect('/admin?created=1')
   } catch {
-    return
+    redirect('/admin?error=user_creation_failed')
   }
 }

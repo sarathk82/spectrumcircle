@@ -23,6 +23,8 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import JobApplyForm from '@/components/jobs/JobApplyForm'
+import { deleteJob } from '@/app/actions/jobs'
+import ConfirmDeleteButton from '@/components/ConfirmDeleteButton'
 
 export default async function JobDetailPage({
   params,
@@ -283,9 +285,10 @@ export default async function JobDetailPage({
                   )}
                 </div>
                 {isOwner && (
-                  <Link href={`/jobs/${id}/edit`} className="ml-auto text-xs font-semibold text-primary-600 hover:underline flex-shrink-0">
-                    Edit
-                  </Link>
+                  <div className="ml-auto flex items-center gap-3 flex-shrink-0">
+                    <Link href={`/jobs/${id}/edit`} className="text-xs font-semibold text-primary-600 hover:underline">Edit</Link>
+                    <ConfirmDeleteButton action={deleteJob} id={id} />
+                  </div>
                 )}
               </div>
             </div>

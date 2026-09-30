@@ -33,6 +33,12 @@ function OAuthErrorBanner() {
   )
 }
 
+function RedirectField() {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirectTo')
+  return redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null
+}
+
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, initialState)
 
@@ -74,6 +80,9 @@ export default function LoginPage() {
       </div>
 
       <form action={formAction} noValidate className="space-y-4">
+        <Suspense>
+          <RedirectField />
+        </Suspense>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-text mb-1.5">
             Email address

@@ -5,7 +5,8 @@ import { addFinancialEntry, createUser, updateUserProfile } from '@/app/actions/
 
 const ROLES: UserRole[] = ['admin', 'parent', 'volunteer', 'job_seeker', 'employer', 'entrepreneur', 'member']
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ created?: string; error?: string }> }) {
+  const params = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -28,6 +29,8 @@ export default async function AdminPage() {
             <h1 className="text-3xl font-bold font-nunito text-text">Admin dashboard</h1>
             <p className="text-text-muted mt-1">Manage members and keep the platform finances transparent.</p>
           </div>
+          {params.created && <p role="status" className="p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">User created successfully.</p>}
+          {params.error && <p role="alert" className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">Could not create user. Check that SUPABASE_SERVICE_ROLE_KEY is configured and try again.</p>}
 
           <section className="bg-white rounded-2xl border border-border shadow-card overflow-hidden">
             <div className="p-6 border-b border-border">

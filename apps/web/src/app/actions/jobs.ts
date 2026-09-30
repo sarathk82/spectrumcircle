@@ -37,3 +37,23 @@ export async function updateJob(formData: FormData) {
     redirect(`/jobs/${id}`)
   }
 }
+
+export async function deleteJob(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const { error } = await (supabase as any)
+    .from('job_postings')
+    .delete()
+    .eq('id', id)
+    .eq('employer_id', user.id)
+
+  if (!error) {
+    revalidatePath('/jobs')
+    redirect('/jobs')
+  }
+}

@@ -41,3 +41,23 @@ export async function updateTutor(formData: FormData) {
     redirect('/tutors')
   }
 }
+
+export async function deleteTutor(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const id = String(formData.get('id') ?? '')
+  if (!id) return
+
+  const { error } = await (supabase as any)
+    .from('tutors')
+    .delete()
+    .eq('id', id)
+    .eq('created_by', user.id)
+
+  if (!error) {
+    revalidatePath('/tutors')
+    redirect('/tutors')
+  }
+}

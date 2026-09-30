@@ -49,6 +49,10 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   }
 
   revalidatePath('/', 'layout')
+  const redirectTo = formData.get('redirectTo')
+  if (typeof redirectTo === 'string' && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
+    redirect(redirectTo)
+  }
   redirect('/dashboard')
 }
 
