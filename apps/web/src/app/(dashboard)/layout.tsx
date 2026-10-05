@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Topbar profile={profile} unreadCount={unreadCount ?? 0} />
-      <main id="main-content" className="flex-1 p-6 overflow-auto">
+      <main id="main-content" className="flex-1 p-4 md:p-6 overflow-auto">
         {children}
       </main>
       <SiteFooter />
